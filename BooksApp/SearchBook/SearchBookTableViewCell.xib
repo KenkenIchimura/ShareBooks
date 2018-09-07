@@ -24,14 +24,14 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </imageView>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LLN-4L-MRo">
-                        <rect key="frame" x="66" y="11" width="185" height="21"/>
+                        <rect key="frame" x="66" y="11" width="166" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
                         <nil key="highlightedColor"/>
                     </label>
                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5cK-hR-yl0">
-                        <rect key="frame" x="66" y="51" width="185" height="21"/>
+                        <rect key="frame" x="66" y="51" width="166" height="21"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                         <nil key="textColor"/>
@@ -40,6 +40,11 @@
                 </subviews>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
+            <connections>
+                <outlet property="authorLabel" destination="5cK-hR-yl0" id="YKb-Tb-A1B"/>
+                <outlet property="bookImageView" destination="RBY-VD-Stu" id="Ren-bY-9LX"/>
+                <outlet property="bookTitleLabel" destination="LLN-4L-MRo" id="fsq-KK-3Xn"/>
+            </connections>
             <point key="canvasLocation" x="-96" y="34.5"/>
         </tableViewCell>
     </objects>

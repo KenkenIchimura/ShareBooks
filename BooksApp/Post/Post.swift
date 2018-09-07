@@ -19,13 +19,16 @@ class Post: NSObject {
     var comments: [Comment]?
     var likeCount: Int = 0
     var book:Book
+    var title:String
+   
     
-    init(objectId: String, user: User, imageUrl: String, text: String, createDate: Date,title:String) {
+    init(objectId: String, user: User, imageUrl: String, text: String, createDate: Date,title:String,book:Book) {
         self.objectId = objectId
         self.user = user
         self.imageUrl = imageUrl
         self.text = text
         self.createDate = createDate
         self.title = title
+        self.book = book
     }
 }

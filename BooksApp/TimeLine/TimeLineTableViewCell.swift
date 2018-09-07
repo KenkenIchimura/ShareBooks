@@ -16,7 +16,9 @@ protocol TimeLineTableViewCellDelegate{
 }
 
 class TimeLineTableViewCell: UITableViewCell {
-
+    
+    var delegate:TimeLineTableViewCellDelegate?
+    
     @IBOutlet var userImageView:UIImageView!
     
     @IBOutlet var userNameLabel:UILabel!
@@ -33,14 +35,16 @@ class TimeLineTableViewCell: UITableViewCell {
     
     @IBOutlet var commentTextView:UITextView!
     
-    @IBOutlet var timestampLabel:UILabel!
+    //@IBOutlet var timestampLabel:UILabel!
+    
+    
     
     
     
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        userImageView.layer.cornerRadius = userIMageView.bounds.width / 2.0
+        userImageView.layer.cornerRadius = userImageView.bounds.width / 2.0
         userImageView.clipsToBounds = true
     }
 
@@ -51,7 +55,7 @@ class TimeLineTableViewCell: UITableViewCell {
     }
     
     @IBAction func like(button:UIButton){
-        self.delegate?.didTapLikeButton(tabelViewCell:self,button:button)
+        self.delegate?.didTapLikeButton(tableViewCell:self,button:button)
     }
     
     @IBAction func openMenu(button:UIButton){
@@ -59,7 +63,7 @@ class TimeLineTableViewCell: UITableViewCell {
     }
     
     @IBAction func showComments(button:UIButton){
-        self.delegate?.didiTapCommentsButton(tableViewCell:self,button:button)
+        self.delegate?.didTapCommentsButton(tableViewCell:self,button:button)
     }
     
     

@@ -11,6 +11,7 @@ import Alamofire
 import SwiftyJSON
 import Kingfisher
 
+//本を羅列するコード
 class BooksViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,UISearchBarDelegate {
     
     let cellIdentifier = "BooksCell"
@@ -30,7 +31,7 @@ class BooksViewController: UIViewController,UITableViewDelegate,UITableViewDataS
         let nib = UINib(nibName: "BooksTableViewCell", bundle: Bundle.main)
         booksTableView.register(nib,forCellReuseIdentifier:cellIdentifier)
         
-        //loadBooks
+        loadBooks()
         
     }
 
@@ -80,7 +81,7 @@ class BooksViewController: UIViewController,UITableViewDelegate,UITableViewDataS
                 print("無効な検索ワードが入力されました。")
                 return
             }
-                
+            
             Alamofire.request(searchPath).responseJSON{(response)in
                 let json = JSON(response.result.value!)
                 //print(JSON)
@@ -105,7 +106,7 @@ class BooksViewController: UIViewController,UITableViewDelegate,UITableViewDataS
                 }
                 self.booksTableView.reloadData()
             }
-                
+            
         }else{
             
             let path = "https://www.googleapis.com/books/v1/volumes?q=programming+intitle"

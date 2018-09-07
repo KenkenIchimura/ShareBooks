@@ -14,131 +14,119 @@ import SVProgressHUD
 import Alamofire
 import SwiftyJSON
 
-class PostViewController:UIViewController,UINavigationControllerDelegate,UIImagePickerControllerDelegate,UITextViewDelegate,UISearchBarDelegate {
+class PostViewController:UIViewController,UINavigationControllerDelegate,UITextViewDelegate,UISearchBarDelegate {
     
-    let placeHolderImage = UIImage(named:"photo-placeholder")
     
-    var resizedImage:UIImage!
+    var post:Post?
     
-    @IBOutlet var postImageView:UIImageView!
+    let placeHolderImage = UIImage(named:"placeholder.jpg")
+    
+    
+    
     @IBOutlet var postTextView:UITextView!
     @IBOutlet var postButton:UIBarButtonItem!
     @IBOutlet var bookImageView:UIImageView!
-    @IBOutlet var 
-    
+    @IBOutlet var authorNameLabel:UILabel!
+    @IBOutlet var bookTitleLabel:UILabel!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
        
         //最初はポストボタンは押せない。
         postButton.isEnabled = false
-        postTextView.placeholder = "キャプションを書く"
+        postTextView.placeholder = "レビューを書く"
         postTextView.delegate = self
     }
+    
+//    override func viewWillAppear(_ animated: Bool) {
+//        if let post?.book.imagePath = bookImagePath {
+//            bookImageView.kf.setImage(with: URL(string:(bookImagePath)!), placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+//            authorNameLabel.text = post?.book.author
+//        }
+//        
+//        
+//        
+//    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         
     }
-    //imagePickerControllerが作動した時の動作。
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
-        let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
-        
-        resizedImage = selectedImage.scale(byFactor: 0.4)
-        postImageView.image = resizedImage
-        picker.dismiss(animated: true, completion: nil)
-        
-        
-    }
     
+   
+    
+    
+//    //imagePickerControllerが作動した時の動作。
+//   func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+//        let selectedImage = info[UIImagePickerControllerOriginalImage] as! UIImage
+//
+//        resizedImage = selectedImage.scale(byFactor: 0.4)
+//        postImageView.image = resizedImage
+//        picker.dismiss(animated: true, completion: nil)
+//
+//
+//    }
+//
     func textViewDidEndEditing(_ textView: UITextView) {
         textView.resignFirstResponder()
     }
-    //画像を選択するボタン（本当はAPIでやる。
-    @IBAction func selectImage(){
-        let alertController = UIAlertController(title: "本の画像を選択", message: "シェアする画像を選択してください", preferredStyle: .actionSheet)
-        let cancelAction = UIAlertAction(title: "キャンセル", style: .default) { (action) in
-            alertController.dismiss(animated: true, completion: nil)
-        }
-        let cameraAction = UIAlertAction(title: "カメラで撮影", style: .default) { (action) in
-            if UIImagePickerController.isSourceTypeAvailable(.camera) == true{
-                let picker = UIImagePickerController()
-                picker.sourceType = .camera
-                picker.delegate = self
-                self.present(picker, animated: true, completion: nil)
-            }else{
-                print("この機種ではカメラは使用できません。")
-            }
-        }
-        let photoLibraryAction = UIAlertAction(title: "フォトライブラリから選択", style: .default) { (action) in
-            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) == true{
-                let picker = UIImagePickerController()
-                picker.sourceType = .photoLibrary
-                picker.delegate = self
-            }else{
-                print("この機種ではフォトライブラリは使用できません。")
-            }
-        }
-        alertController.addAction(cancelAction)
-        alertController.addAction(cameraAction)
-        alertController.addAction(photoLibraryAction)
-        self.present(alertController, animated: true, completion: nil)
-    }
+//    //画像を選択するボタン（本当はAPIでやる。
+//   @IBAction func selectImage(){
+//        let alertController = UIAlertController(title: "本の画像を選択", message: "シェアする画像を選択してください", preferredStyle: .actionSheet)
+//        let cancelAction = UIAlertAction(title: "キャンセル", style: .default) { (action) in
+//            alertController.dismiss(animated: true, completion: nil)
+//        }
+//        let cameraAction = UIAlertAction(title: "カメラで撮影", style: .default) { (action) in
+//            if UIImagePickerController.isSourceTypeAvailable(.camera) == true{
+//                let picker = UIImagePickerController()
+//                picker.sourceType = .camera
+//                picker.delegate = self
+//                self.present(picker, animated: true, completion: nil)
+//            }else{
+//                print("この機種ではカメラは使用できません。")
+//            }
+//        }
+//        let photoLibraryAction = UIAlertAction(title: "フォトライブラリから選択", style: .default) { (action) in
+//            if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) == true{
+//                let picker = UIImagePickerController()
+//                picker.sourceType = .photoLibrary
+//                picker.delegate = self
+//            }else{
+//                print("この機種ではフォトライブラリは使用できません。")
+//            }
+//        }
+//        alertController.addAction(cancelAction)
+//        alertController.addAction(cameraAction)
+//        alertController.addAction(photoLibraryAction)
+//        self.present(alertController, animated: true, completion: nil)
+//    }
+
     
-    @IBAction func sharePhoto() {
-        SVProgressHUD.show()
+    @IBAction func postReview(){
         
-        // 撮影した画像をデータ化したときに右に90度回転してしまう問題の解消
-        UIGraphicsBeginImageContext(resizedImage.size)
-        let rect = CGRect(x: 0, y: 0, width: resizedImage.size.width, height: resizedImage.size.height)
-        resizedImage.draw(in: rect)
-        resizedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
+        let object = NCMBObject(className: "Post")
         
-        let data = UIImagePNGRepresentation(resizedImage)
-        // ここを変更（ファイル名無いので）
-        let file = NCMBFile.file(with: data) as! NCMBFile
-        file.saveInBackground({ (error) in
-            if error != nil {
-                SVProgressHUD.dismiss()
-                let alert = UIAlertController(title: "画像アップロードエラー", message: error!.localizedDescription, preferredStyle: .alert)
-                let okAction = UIAlertAction(title: "OK", style: .default, handler: { (action) in
-                    
-                })
-                alert.addAction(okAction)
-                self.present(alert, animated: true, completion: nil)
-            } else {
-                // 画像アップロードが成功
-                let postObject = NCMBObject(className: "Post")
+        object?.setObject(post?.book.imagePath!, forKey: "imageUrl")
+        object?.setObject(post?.book.author!, forKey: "author")
+        object?.setObject(post?.book.bookTitle, forKey: "bookTitle")
+        object?.setObject(postTextView.text!, forKey: "text")
+        object?.setObject(NCMBUser.current(), forKey: "user")
+        
+        object?.saveInBackground({ (error) in
+            if error != nil{
+                SVProgressHUD.showError(withStatus: error!.localizedDescription)
+            }else{
                 
-                if self.postTextView.text.characters.count == 0 {
-                    print("入力されていません")
-                    return
-                }
-                postObject?.setObject(self.postTextView.text!, forKey: "text")
-                postObject?.setObject(NCMBUser.current(), forKey: "user")
-                let url = "https://mb.api.cloud.nifty.com/2013-09-01/applications/自分のアプリID/publicFiles/" + file.name
-                postObject?.setObject(url, forKey: "imageUrl")
-                postObject?.saveInBackground({ (error) in
-                    if error != nil {
-                        SVProgressHUD.showError(withStatus: error!.localizedDescription)
-                    } else {
-                        SVProgressHUD.dismiss()
-                        self.postImageView.image = nil
-                        self.postImageView.image = UIImage(named: "photo-placeholder")
-                        self.postTextView.text = nil
-                        self.tabBarController?.selectedIndex = 0
-                    }
-                })
             }
-        }) { (progress) in
-            print(progress)
-        }
+        })
+        
+        
+        
+        
     }
-    
     func confirmContent() {
-        if postTextView.text.characters.count > 0 && postImageView.image != placeholderImage {
+        if postTextView.text.characters.count > 0 && bookImageView.image != placeHolderImage {
+            
             postButton.isEnabled = true
         } else {
             postButton.isEnabled = false
@@ -153,7 +141,7 @@ class PostViewController:UIViewController,UINavigationControllerDelegate,UIImage
         let alert = UIAlertController(title: "投稿内容の破棄", message: "入力中の投稿内容を破棄しますか？", preferredStyle: .alert)
         let okAction = UIAlertAction(title: "OK", style: .default, handler: { (action) in
             self.postTextView.text = nil
-            self.postImageView.image = UIImage(named: "photo-placeholder")
+            self.bookImageView.image = UIImage(named: "photo-placeholder")
             self.confirmContent()
         })
         let cancelAction = UIAlertAction(title: "キャンセル", style: .cancel, handler: { (action) in
@@ -163,6 +151,14 @@ class PostViewController:UIViewController,UINavigationControllerDelegate,UIImage
         alert.addAction(cancelAction)
         self.present(alert, animated: true, completion: nil)
     }
+    
+    
+    //本棚から本を選択してそれが表示されるようにする。
+    @IBAction func moveToSelectBook(){
+        self.performSegue(withIdentifier: "toSelect", sender: nil)
+        
+    }
+    
     
 }
 
@@ -175,4 +171,4 @@ class PostViewController:UIViewController,UINavigationControllerDelegate,UIImage
     
     
     
-}
+

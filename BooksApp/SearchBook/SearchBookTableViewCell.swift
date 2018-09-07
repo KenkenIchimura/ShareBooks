@@ -8,8 +8,15 @@
 
 import UIKit
 
-class SearchBookTableViewCell: UITableViewCell {
 
+
+class SearchBookTableViewCell: UITableViewCell {
+    
+    @IBOutlet var bookTitleLabel:UILabel!
+    @IBOutlet var bookImageView:UIImageView!
+    @IBOutlet var authorLabel:UILabel!
+    
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

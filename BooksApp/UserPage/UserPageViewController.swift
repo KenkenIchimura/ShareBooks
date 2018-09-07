@@ -9,6 +9,7 @@
 import UIKit
 import NCMB
 import Kingfisher
+import SVProgressHUD
 
 class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDelegate,UINavigationControllerDelegate,UICollectionViewDelegate,UICollectionViewDataSource {
    
@@ -33,12 +34,13 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
         introductionTextView.delegate = self
         
         //カスタムセルの登録
-        let nib = UINib(nibName: "BookColletionViewCell", bundle: Bundle.main)
+        let nib = UINib(nibName: "BookCollectionViewCell", bundle: Bundle.main)
         bookCollectionView.register(nib, forCellWithReuseIdentifier: "Cell")
         
         //本棚の本をロードする
         loadBook()
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         
         if let user = NCMBUser.current(){
@@ -46,7 +48,7 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
             
             file.getDataInBackground({ (data, error) in
                 if error != nil{
-                    print(error)
+                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
                 }else{
                     if data != nil{
                         let image = UIImage(data: data!)
@@ -72,6 +74,7 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
             ud.set(false, forKey: "isLogin")
             ud.synchronize()
         }
+        loadBook()
         
     }
     
@@ -85,7 +88,7 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
         let logoutAction = UIAlertAction(title: "ログアウト", style: .default) { (action) in
             NCMBUser.logOutInBackground({ (error) in
                 if error != nil{
-                    print(error)
+                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
                 }else{
                     //ログアウト成功（SignIn画面に戻る）
                     let storyboard = UIStoryboard(name: "Sign", bundle: Bundle.main)
@@ -106,7 +109,7 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
             let user = NCMBUser.current()
             user?.deleteInBackground({ (error) in
                 if error != nil{
-                    print(error)
+                    SVProgressHUD.showError(withStatus: error!.localizedDescription)
                 }else{
                     //デリートできるなら、ログアウト状態かつ、udのログイン状態を解除かつsignin画面に戻る
                     let ud = UserDefaults.standard
@@ -127,7 +130,7 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
     }
     
     @IBAction func addBook(){
-        performSegue(withIdentifier: "registerBook", sender: nil)
+        self.performSegue(withIdentifier: "registerBook", sender: nil)
     }
     //コレクションのデータの数
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -136,23 +139,35 @@ class UserPageViewController: UIViewController,UITextFieldDelegate,UITextViewDel
     
     //コレクションにデータを表示させる.(画像のみ)
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let query = NCMBQuery(className: "BookCollection")
+        query?.order(byDescending: "createDate")
+        query?.findObjectsInBackground({ (result, error) in
+            if error != nil{
+                SVProgressHUD.showError(withStatus: error!.localizedDescription)
+            }else{
+                let bookResult = result as! [NCMBObject]
+                self.bookCollection = bookResult
+            }
+        })
+        
         let cell = bookCollectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! BookCollectionViewCell
         let bookImageUrl = bookCollection[indexPath.row].object(forKey:"bookImageUrl" )as! String
         cell.bookImageView.kf.setImage(with: URL(string:bookImageUrl), placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
-        bookCollectionView.reloadData()
         return cell
     }
     
     //本棚の更新
     func loadBook(){
+        bookCollection = [NCMBObject]()
+        
         let query = NCMBQuery(className: "BookCollection")
-        query?.whereKey("bookImageUrl", equalTo: nil)
+        query?.order(byDescending: "createDate")
         query?.findObjectsInBackground({ (result, error) in
             if error != nil{
-                print(error)
+                SVProgressHUD.showError(withStatus: error!.localizedDescription)
             }else{
-                let bookImageUrl = result as![NCMBObject]
-                self.bookCollection.append(bookImageUrl)
+                let bookCollections = result as![NCMBObject]
+                self.bookCollection = bookCollections
                 self.bookCollectionView.reloadData()
             }
         })

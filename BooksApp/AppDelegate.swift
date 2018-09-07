@@ -7,15 +7,38 @@
 //
 
 import UIKit
+import NCMB
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
     var window: UIWindow?
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+        
+        NCMB.setApplicationKey("9a311c0dc2166f2cddbe20364aafb995fa3b9a2ea06a335df09754c2e265e2cd", clientKey:"c6a739b1918090f1407bd59afd129985a69e7ead38a8d1a30bf212ff13f1690e")
         // Override point for customization after application launch.
+        
+        //let ud = UserDefaults.standard
+        //let isLogin = ud.bool(forKey: "isLogin")
+        
+        if NCMBUser.current() != nil{
+            self.window? = UIWindow(frame: UIScreen.main.bounds)
+            let storyboard = UIStoryboard(name: "Main", bundle: Bundle.main)
+            let rootViewController = storyboard.instantiateViewController(withIdentifier: "RootTabBarController")
+            self.window?.rootViewController = rootViewController
+            self.window?.backgroundColor = UIColor.white
+            self.window?.makeKeyAndVisible()
+        }else{
+            self.window? = UIWindow(frame: UIScreen.main.bounds)
+            let storyboard = UIStoryboard(name: "Sign", bundle: Bundle.main)
+            let rootViewController = storyboard.instantiateViewController(withIdentifier: "SignViewController")
+            self.window?.rootViewController = rootViewController
+            self.window?.backgroundColor = UIColor.white
+            self.window?.makeKeyAndVisible()
+        }
+        
+        
         return true
     }
 

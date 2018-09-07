@@ -8,6 +8,14 @@
 
 import UIKit
 
+
 class Book: NSObject {
 
+    var bookTitle:String
+    var author:String?
+    var imagePath:String?
+    
+    init(bookTitle:String){
+        self.bookTitle = bookTitle
+    }
 }

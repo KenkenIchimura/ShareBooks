@@ -15,7 +15,7 @@ protocol SearchTableViewCellDelegate {
 }
 
 
-class SearachTableViewCell: UITableViewCell {
+class SearchTableViewCell: UITableViewCell {
 
     
     var delegate:SearchTableViewCellDelegate?

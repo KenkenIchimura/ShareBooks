@@ -27,7 +27,7 @@
                         <rect key="frame" x="-60" y="44" width="58" height="99"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </imageView>
-                    <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="G3K-ux-28k">
+                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="G3K-ux-28k">
                         <rect key="frame" x="4" y="8" width="55" height="83"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </imageView>
@@ -36,7 +36,7 @@
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
             <size key="customSize" width="63" height="99"/>
             <connections>
-                <outlet property="bookImageVIew" destination="G3K-ux-28k" id="HQu-4O-YGW"/>
+                <outlet property="bookImageView" destination="G3K-ux-28k" id="KWd-rb-RQy"/>
             </connections>
             <point key="canvasLocation" x="51.5" y="43.5"/>
         </collectionViewCell>

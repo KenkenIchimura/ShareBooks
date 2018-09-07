@@ -15,18 +15,17 @@ import Alamofire
 import SwiftyJSON
 
 //これはタイムラインの画面です。
-class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,TimeLineTableViewCellDelegate,UISearchBarDelegate {
+class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDataSource,UISearchBarDelegate {
     
     var selectedPost: Post?
     
     
     var posts = [Post]()
     
-    var followings = [NCMBUser]()
+    //var followings = [NCMBUser]()
     
     @IBOutlet var booksTableView: UITableView!
 
-    @IBOutlet var bookSearchBar:UISearchBar!
     
     let cellIdentifier = "BooksCell"
     
@@ -49,6 +48,7 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
         
         // フォロー中のユーザーを取得する。その後にフォロー中のユーザーの投稿のみ読み込み.まずフォロー中の人の更新。
         //loadFollowingUsers()
+        loadTimeline()
     }
 
     override func didReceiveMemoryWarning() {
@@ -79,7 +79,7 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier) as! TimeLineTableViewCell
         //セルのデリゲート先はこのファイルです。
-        cell.delegate = self
+        
         //セルにつけられるタグは、indexPath.rowです。
         cell.tag = indexPath.row
         
@@ -93,7 +93,7 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
         
         cell.commentTextView.text = posts[indexPath.row].text
         let imageUrl = posts[indexPath.row].imageUrl
-        cell.photoImageView.kf.setImage(with: URL(string: imageUrl))
+        cell.userImageView.kf.setImage(with: URL(string: imageUrl))
         
         // Likeによってハートの表示を変える
         if posts[indexPath.row].isLiked == true {
@@ -106,13 +106,13 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
         cell.likeCountLabel.text = "\(posts[indexPath.row].likeCount)件"
         
         // タイムスタンプ(投稿日時) (※フォーマットのためにSwiftDateライブラリをimport)
-        cell.timestampLabel.text = posts[indexPath.row].createDate.string()
+        //cell.timestampLabel.text = posts[indexPath.row].createDate.string()
         
         cell.bookTitleLabel.text = posts[indexPath.row].title
-        cell.authorLabel.text = posts[indexPath.row].author
+        cell.authorLabel.text = posts[indexPath.row].book.author
         
-        if posts[indexPath.row].imagePath != nil{
-            cell.bookImageView.kf.setImage(with:URL(string:posts[IndexPath].imagePath!), placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
+        if posts[indexPath.row].book.imagePath != nil{
+            cell.bookImageView.kf.setImage(with:URL(string:posts[indexPath.row].book.imagePath!), placeholder: nil, options: nil, progressBlock: nil, completionHandler: nil)
         }
         
         
@@ -212,7 +212,7 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
         query?.includeKey("user")
         
         // フォロー中の人 + 自分の投稿だけ持ってくる
-        query?.whereKey("user", containedIn: followings)
+        //query?.whereKey("user", containedIn: followings)
         
         // オブジェクトの取得
         query?.findObjectsInBackground({ (result, error) in
@@ -225,19 +225,25 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
                 for postObject in result as! [NCMBObject] {
                     // ユーザー情報をUserクラスにセット
                     let user = postObject.object(forKey: "user") as! NCMBUser
-                    
+                    let booktitle = postObject.object(forKey: "booktitle") as! String
+                    let author = postObject.object(forKey: "author") as! String
                     // 退会済みユーザーの投稿を避けるため、activeがfalse以外のモノだけを表示
                     if user.object(forKey: "active") as? Bool != false {
                         // 投稿したユーザーの情報をUserモデルにまとめる
                         let userModel = User(objectId: user.objectId, userName: user.userName)
                         userModel.displayName = user.object(forKey: "displayName") as? String
                         
+                        let bookModel = Book(bookTitle:booktitle)
+                        bookModel.author = author
+                       
+                        
                         // 投稿の情報を取得。NCMBの一つのクラスの横一列をobjectと呼ぶらしい。
                         let imageUrl = postObject.object(forKey: "imageUrl") as! String
                         let text = postObject.object(forKey: "text") as! String
                         
+                        
                         // 2つのデータ(投稿情報と誰が投稿したか?)を合わせてPostクラスにセット
-                        let post = Post(objectId: postObject.objectId, user: userModel, imageUrl: imageUrl, text: text, createDate: postObject.createDate)
+                        let post = Post(objectId: postObject.objectId, user: userModel, imageUrl: imageUrl, text: text, createDate: postObject.createDate, title: self.title!, book:bookModel)
                         
                         // likeの状況(自分が過去にLikeしているか？)によってデータを挿入
                         let likeUsers = postObject.object(forKey: "likeUser") as? [String]
@@ -272,33 +278,33 @@ class TimeLineViewController: UIViewController,UITableViewDelegate,UITableViewDa
     //引っ張って最新のタイムラインがリロードされる。
     @objc func reloadTimeline(refreshControl: UIRefreshControl) {
         refreshControl.beginRefreshing()
-        self.loadFollowingUsers()
+        loadTimeline()
         // 更新が早すぎるので2秒遅延させる
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
             refreshControl.endRefreshing()
         }
     }
     
-    func loadFollowingUsers() {
-        // フォロー中の人だけ持ってくる
-        let query = NCMBQuery(className: "Follow")
-        query?.includeKey("user")
-        query?.includeKey("following")
-        query?.whereKey("user", equalTo: NCMBUser.current())
-        query?.findObjectsInBackground({ (result, error) in
-            if error != nil {
-                SVProgressHUD.showError(withStatus: error!.localizedDescription)
-            } else {
-                self.followings = [NCMBUser]()
-                for following in result as! [NCMBObject] {
-                    self.followings.append(following.object(forKey: "following") as! NCMBUser)
-                }
-                self.followings.append(NCMBUser.current())
-                
-                self.loadTimeline()
-            }
-        })
-    }
+//    func loadFollowingUsers() {
+//        // フォロー中の人だけ持ってくる
+//        let query = NCMBQuery(className: "Follow")
+//        query?.includeKey("user")
+//        query?.includeKey("following")
+//        query?.whereKey("user", equalTo: NCMBUser.current())
+//        query?.findObjectsInBackground({ (result, error) in
+//            if error != nil {
+//                SVProgressHUD.showError(withStatus: error!.localizedDescription)
+//            } else {
+//                self.followings = [NCMBUser]()
+//                for following in result as! [NCMBObject] {
+//                    self.followings.append(following.object(forKey: "following") as! NCMBUser)
+//                }
+//                self.followings.append(NCMBUser.current())
+//
+//                self.loadTimeline()
+//            }
+//        })
+//    }
     
 
 
